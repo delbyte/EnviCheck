@@ -52,19 +52,19 @@ async def get_info(lat: float, lon: float):
     except Exception as e:
         print(f"Error getting AQI data: {e}")
 
-    # Get weather data from OpenWeatherMap
+    # Get weather data from OpenWeatherMap (Current Weather Data API)
     try:
         openweathermap_api_key = os.getenv("OPENWEATHERMAP_API_KEY")
-        weather_url = f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&exclude=minutely,hourly,daily,alerts&units=metric&appid={openweathermap_api_key}"
+        print("OPENWEATHERMAP_API_KEY:", openweathermap_api_key)  # Debug API key loading
+        weather_url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric&appid={openweathermap_api_key}"
         response = requests.get(weather_url)
         response.raise_for_status()
         data = response.json()
-        current = data["current"]
+        print("Weather data:", data)  # Debug API response
         result["weather"] = {
-            "temp": current["temp"],
-            "description": current["weather"][0]["description"],
-            "uvi": current["uvi"],
-            "humidity": current["humidity"]
+            "temp": data["main"]["temp"],
+            "description": data["weather"][0]["description"],
+            "humidity": data["main"]["humidity"]
         }
     except Exception as e:
         print(f"Error getting weather data: {e}")
