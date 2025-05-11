@@ -20,45 +20,69 @@ async def root():
 # Get info endpoint
 @app.get("/info")
 async def get_info(lat: float, lon: float):
+    result = {
+        "location": "Unknown location",
+        "aqi": None,
+        "category": "Data not available",
+        "weather": None,
+        "photo_url": None
+    }
+
     # Get location name from Nominatim
-    nominatim_url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json"
-    headers = {"User-Agent": "EnviCheck/1.0"}
-    response = requests.get(nominatim_url, headers=headers)
-    if response.status_code == 200:
+    try:
+        nominatim_url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json"
+        headers = {"User-Agent": "EnviCheck/1.0"}
+        response = requests.get(nominatim_url, headers=headers)
+        response.raise_for_status()
         data = response.json()
-        location = data.get("display_name", "Unknown location")
-    else:
-        location = "Unknown location"
+        result["location"] = data.get("display_name", "Unknown location")
+    except Exception as e:
+        print(f"Error getting location name: {e}")
 
     # Get air quality data from WAQI
-    waqi_token = os.getenv("WAQI_TOKEN")
-    waqi_url = f"https://api.waqi.info/feed/geo:{lat};{lon}/?token={waqi_token}"
-    response = requests.get(waqi_url)
-    aqi = None
-    category = "Data not available"
-    if response.status_code == 200:
+    try:
+        waqi_token = os.getenv("WAQI_TOKEN")
+        waqi_url = f"https://api.waqi.info/feed/geo:{lat};{lon}/?token={waqi_token}"
+        response = requests.get(waqi_url)
+        response.raise_for_status()
         data = response.json()
         if data["status"] == "ok":
-            aqi = data["data"]["aqi"]
-            category = get_aqi_category(aqi)
+            result["aqi"] = data["data"]["aqi"]
+            result["category"] = get_aqi_category(result["aqi"])
+    except Exception as e:
+        print(f"Error getting AQI data: {e}")
+
+    # Get weather data from OpenWeatherMap
+    try:
+        openweathermap_api_key = os.getenv("OPENWEATHERMAP_API_KEY")
+        weather_url = f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&exclude=minutely,hourly,daily,alerts&units=metric&appid={openweathermap_api_key}"
+        response = requests.get(weather_url)
+        response.raise_for_status()
+        data = response.json()
+        current = data["current"]
+        result["weather"] = {
+            "temp": current["temp"],
+            "description": current["weather"][0]["description"],
+            "uvi": current["uvi"],
+            "humidity": current["humidity"]
+        }
+    except Exception as e:
+        print(f"Error getting weather data: {e}")
 
     # Get photo from Unsplash
-    unsplash_access_key = os.getenv("UNSPLASH_ACCESS_KEY")
-    keyword = location.split(",")[0]
-    unsplash_url = f"https://api.unsplash.com/search/photos?query={keyword}&client_id={unsplash_access_key}"
-    photo_url = None
-    response = requests.get(unsplash_url)
-    if response.status_code == 200:
+    try:
+        unsplash_access_key = os.getenv("UNSPLASH_ACCESS_KEY")
+        keyword = result["location"].split(",")[0]
+        unsplash_url = f"https://api.unsplash.com/search/photos?query={keyword}&client_id={unsplash_access_key}"
+        response = requests.get(unsplash_url)
+        response.raise_for_status()
         data = response.json()
         if data["results"]:
-            photo_url = data["results"][0]["urls"]["small"]
+            result["photo_url"] = data["results"][0]["urls"]["small"]
+    except Exception as e:
+        print(f"Error getting photo: {e}")
 
-    return {
-        "location": location,
-        "aqi": aqi,
-        "category": category,
-        "photo_url": photo_url
-    }
+    return result
 
 def get_aqi_category(aqi):
     if aqi is None:
