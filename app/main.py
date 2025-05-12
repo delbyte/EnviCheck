@@ -55,17 +55,21 @@ async def get_info(lat: float, lon: float):
     # Get weather data from OpenWeatherMap (Current Weather Data API)
     try:
         openweathermap_api_key = os.getenv("OPENWEATHERMAP_API_KEY")
-        print("OPENWEATHERMAP_API_KEY:", openweathermap_api_key)  # Debug API key loading
+        print("OPENWEATHERMAP_API_KEY:", openweathermap_api_key)  # Debug: Print API key
         weather_url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric&appid={openweathermap_api_key}"
+        print("Request URL:", weather_url)  # Debug: Print full request URL
         response = requests.get(weather_url)
-        response.raise_for_status()
+        response.raise_for_status()  # Raise an error for bad status codes
         data = response.json()
-        print("Weather data:", data)  # Debug API response
+        print("Weather data:", data)  # Debug: Print API response
         result["weather"] = {
             "temp": data["main"]["temp"],
             "description": data["weather"][0]["description"],
             "humidity": data["main"]["humidity"]
         }
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error: {http_err}")
+        print(f"Response content: {response.content}")  # Show API error message
     except Exception as e:
         print(f"Error getting weather data: {e}")
 
