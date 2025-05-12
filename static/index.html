@@ -3,20 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EnviCheck</title>
-    <!-- Load CSS files first -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.css" />
-    <link rel="stylesheet" href="/static/style.css" />
+    <title>EnviCheck - Environmental Data Checker</title>
     
-    <!-- Load JavaScript libraries -->
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.umd.js"></script>
+    <!-- Favicon -->
+    <link rel="icon" href="/static/favicon.png" type="image/png">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Load Leaflet JS before our app JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
-    <div id="map"></div>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-leaf"></i>
+                <h1>EnviCheck</h1>
+            </div>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Search for a location...">
+                <button id="search-button"><i class="fas fa-search"></i></button>
+            </div>
+        </header>
+        
+        <main>
+            <div id="map"></div>
+            
+            <div id="data-panel" class="hidden">
+                <div class="panel-header">
+                    <h2 id="location-name">Location Name</h2>
+                    <button id="close-panel"><i class="fas fa-times"></i></button>
+                </div>
+                
+                <div class="panel-content">
+                    <div id="location-info" class="info-section">
+                        <h3>Location</h3>
+                        <p id="location-full"></p>
+                        <p id="location-coords"></p>
+                    </div>
+                    
+                    <div id="air-quality" class="info-section">
+                        <h3>Air Quality</h3>
+                        <div class="aqi-container">
+                            <div id="aqi-value" class="aqi-value">--</div>
+                            <div id="aqi-category" class="aqi-category">Unknown</div>
+                        </div>
+                    </div>
+                    
+                    <div id="weather" class="info-section">
+                        <h3>Weather</h3>
+                        <div class="weather-container">
+                            <div class="weather-main">
+                                <img id="weather-icon" src="" alt="Weather condition">
+                                <div class="temp-container">
+                                    <div id="weather-temp" class="temp">--°C</div>
+                                    <div id="weather-desc" class="weather-desc">Unknown</div>
+                                </div>
+                            </div>
+                            <div class="weather-details">
+                                <div class="weather-detail">
+                                    <i class="fas fa-temperature-low"></i>
+                                    <span>Feels like: <span id="weather-feels-like">--°C</span></span>
+                                </div>
+                                <div class="weather-detail">
+                                    <i class="fas fa-tint"></i>
+                                    <span>Humidity: <span id="weather-humidity">--%</span></span>
+                                </div>
+                                <div class="weather-detail">
+                                    <i class="fas fa-wind"></i>
+                                    <span>Wind: <span id="weather-wind">-- m/s</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="location-image" class="info-section">
+                        <div class="image-container">
+                            <img id="place-image" src="" alt="Location image">
+                            <div class="image-credit">
+                                Photo by <a id="image-credit-link" href="#" target="_blank" rel="noopener">Unknown</a> on Unsplash
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>© 2025 EnviCheck - Environmental Data Checker | Data: OpenStreetMap, WAQI, OpenWeatherMap, Unsplash</p>
+        </footer>
+    </div>
     
-    <!-- Load your custom script last, after the page has loaded -->
-    <script src="/static/script.js"></script>
+    <!-- Loading indicator -->
+    <div id="loading-indicator" class="hidden">
+        <div class="spinner"></div>
+        <p>Loading data...</p>
+    </div>
+    
+    <!-- Error toast -->
+    <div id="error-toast" class="toast hidden">
+        <div class="toast-content">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="error-message">An error occurred</span>
+        </div>
+        <button id="close-toast"><i class="fas fa-times"></i></button>
+    </div>
+    
+    <!-- Custom JS -->
+    <script src="/static/js/app.js"></script>
 </body>
 </html>
